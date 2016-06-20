@@ -1,0 +1,41 @@
+<% include ./_header %>
+
+<h2>Specify user to clone</h2>
+<div class="row collapse">
+	<% if (hostname === "superspeak-dev.parseapp.com") { %>
+		For security reasons, this tool can only be used in superspeak-main.
+	<% } else if (hostname === "superspeak-main.parseapp.com") { %>
+		<label for="txtUsername">
+		Username:
+		</label>
+		<div class="small-10 columns">
+			<input id="txtUsername"  type="text" value="<%=username%>"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnClone').click()}" placeholder="Username">
+		</div>
+		<div class="small-2 columns">
+			<a id="btnClone" href="#" class="button postfix" onclick="cloneUser()">Clone!</a>
+		</div>
+	<% } else { %>
+		<script>console.log(window.location.hostname);</script>
+		I don't recognize this place.
+	<% } %>
+</div>
+<script type="text/javascript">
+	<% if(hostname === "superspeak-main.parseapp.com"){ %>
+		function cloneUser() {
+			var username = $("#txtUsername").val();
+			$.ajax({
+				url: "/cloneUser/" + encodeURIComponent(username),
+				method: "POST",
+				data: { username: username },
+				success: function() { alert("User was cloned successfully."); },
+				error: function(jqXHR) { console.error(jqXHR); }
+			});
+		}
+	<% } %>
+	$(document).ready(function() {
+		$('#txtUsername').select();
+	});
+	
+</script>
+
+<% include ./_footer %>

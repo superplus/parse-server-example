@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<link href="https://fonts.googleapis.com/css?family=Ubuntu" rel='stylesheet' type='text/css'/>
+		<link href="https://fonts.googleapis.com/css?family=Oswald" rel='stylesheet' type='text/css'/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+		<link rel="stylesheet" href="/css/analyticsListeners.css"/>
+		<script src="/js/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+		<script type="text/javascript">
+			function onSave() {
+				var $selection = $('input:checked');
+				var values = [];
+				for (var i = 0; i < $selection.length; i++)
+					values[i] = $selection[i].value;
+				console.log(values);
+				$.ajax({
+					url: "/analyticsListeners",
+					method: "PUT",
+					params: { value: values },
+					success: function() { alert("Data successfully saved!") },
+					error: function(jqXHR) { console.error("Error occurred in analyticsListener interface: " + JSON.stringify(jqXHR)); }
+				});
+			}
+		</script>
+	</head>
+	<body>
+		<div id="backgroundImage" class="col-md-5">
+			<img src="/dataGiraffe.png" width="194px" height="560px"/>
+		</div>
+		<div id="mainArea" class="col-md-7">
+			<h1>Welcome to the Analytics Listeners interface!</h1>
+			<form role="form" class="col-md-5" onsubmit="onSave(); return false;">
+				<div id="checkboxes" class="form-group">
+					<% for (var i = 0; i < elements.length; i++) { %>
+						<input type="checkbox" <%= values[i] ? 'checked' : '' %>> <%= elements[i] %>
+						<br/>
+						</input>
+					<% } %>
+					<br>
+					<input id="saveButton" class="form-control" type="submit" name="submitUserAction">
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

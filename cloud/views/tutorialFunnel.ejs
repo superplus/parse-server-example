@@ -1,0 +1,66 @@
+<% include ./_header %>
+
+<h1>Tutorial funnel - last 60 days:</h1>
+<% if(typeof analysis !=="undefined") { %>
+	<h2>Overview:</h2>
+	<div class="row">
+		<div class="small-3 columns">
+			<ul class="no-bullet">
+				<li>
+					Starting users: <span style="float:right"><%= analysis["starting_amount"] %></span>
+				</li>
+				<li>
+					Completed users: <span style="float:right"><%= analysis["completion"] %> (<%= Math.round(100/analysis["starting_amount"]*analysis["completion"]) %>%)</span>
+				</li>
+				<li>
+					Total steps: <span style="float:right"><%= analysis["steps"] %></span>
+				</li>
+				<li>
+					Fewest steps cleared: <span style="float:right"><%= analysis["worst"] %></span>
+				</li>
+			</ul>
+		</div>
+	</div>
+<% } %>
+<% if(typeof steps !=="undefined") { %>
+	<h2>Steps:</h2>
+	<div class="row">
+		<div class="small-12 columns">
+			<table class="chart">
+				<tbody>
+				<% var totalTime = 0; %>
+				<% for(step in steps){ %>
+					<tr>
+						<td>
+							<p class="percentage"><%= Math.round(steps[step].overall_conv_ratio*100) %>%</p>
+						</td>
+						<td class="chart">
+							<ul class="inline-list">
+								<li><%= steps[step].goal %> <%=steps[step].selector.substring(steps[step].selector.lastIndexOf(" ")+1)%></li>
+								<% if(step<steps.length-1) { %>
+									<li>Time avg.: <%= steps[parseInt(step)+1].avg_time %></li>
+									<% totalTime += steps[parseInt(step)+1].avg_time %>
+									<% console.log(totalTime) %>
+								<% }else{ %>
+									<li>Total time avg.: <%= totalTime %></li>
+								<% } %>
+								<li>Users: <%= steps[step].count %></li>
+								<% if(step<steps.length-1) { %>
+									<li>Dropoff: <%= (1000-Math.round(steps[parseInt(step)+1].step_conv_ratio*1000))/10 %>%</li>
+								<% }else{ %>
+									<li>Total dropoff: <%= (1000-Math.round(steps[step].overall_conv_ratio*1000))/10 %>%</li>
+								<% } %>
+							</ul>
+							<div class="barchart">
+								<span class="meter" style="width: <%= (Math.round(steps[step].overall_conv_ratio*1000))/10 %>%"></span>
+							</div>
+						</td>
+					</tr>
+				<% } %>
+				</tbody>
+			</table>
+		</div>
+	</div>
+<% } %>
+
+<% include ./_footer %>

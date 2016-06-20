@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title><%= typeof title === "undefined" ? "SuperSpeak dashboard" : title+" - SuperSpeak dashboard" %></title>
+		<script type="text/javascript" src="/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/js/parse.min.js"></script>
+		<script type="text/javascript" src="/js/moment.min.js"></script>
+		<script type="text/javascript" src="/js/foundation.js"></script>
+		<script type="text/javascript" src="/js/foundation.dropdown.js"></script>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<!-- If you are using the CSS version, only link these 2 files, you may add app.css to use for your overrides if you like -->
+		<link rel="stylesheet" href="/css/normalize.css">
+		<link rel="stylesheet" href="/css/foundation.css">
+		<link rel="stylesheet" href="/css/app.css">
+
+		<script src="/js/vendor/modernizr.js"></script>
+	</head>
+	<body>
+	<div class="row">
+	    <div class="small-12 columns">
+			<h1><a href="/">SuperSpeak Dashboard</a></h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="small-12 columns">
+			<div class="panel">
+				<% if (typeof error !=="undefined") { %>
+					<div class="alert-box alert">
+						<%= error %>
+					</div>
+				<% } %>
+				<% if (typeof notify !=="undefined") { %>
+					<div class="alert-box">
+						<%= notify %>
+					</div>
+				<% } %>
+				<% if (typeof success !=="undefined") { %>
+					<div class="alert-box success">
+						<%= success %>
+					</div>
+				<% } %>

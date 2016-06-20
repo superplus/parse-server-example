@@ -1,0 +1,164 @@
+<% include ./_header %>
+
+<h2>Enter username to get data</h2>
+<div class="row collapse">
+	<label for="txtUsername">
+		Username:
+	</label>
+	<div class="small-10 columns">
+		<input id="txtUsername"  type="text" value="<%=username%>"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnQuery').click()}" placeholder="Username">
+	</div>
+	<div class="small-2 columns">
+		<a id="btnQuery" href="#" class="button postfix" onclick="queryUser()">Query</a>
+	</div>
+</div>
+<div class="row collapse">
+	<div class="small-12 columns">
+		<textarea id="txtData" onclick="this.select()" placeholder="Data will appear here"><%= typeof data !== "undefined" ? data : "" %></textarea>
+	</div>
+</div>
+<% if(typeof data !== "undefined" && data!==""){ %>
+	<div class="row collapse">
+		<div class="small-12 columns">
+			<% var userJson = JSON.parse(data) %>
+			<h3>User summary for "<%= userJson.User.name %>"</h3>
+			<div class="row">
+				<div class="small-6 columns">
+					<ul class="no-bullet">
+						<li>Time Spent in app:<span style="float:right">
+							<% if(typeof userJson.User.badgeProgress !== "undefined"){ %>
+								<% if(typeof userJson.User.badgeProgress["badgeSpendSomeTime"] !== "undefined"){ %>
+									<% var timeInApp = parseInt(userJson.User.badgeProgress["badgeSpendSomeTime"].count)/1000 %>
+									<% var hours = Math.floor(timeInApp/60/60) %>
+									<% var minutes = Math.floor((timeInApp-hours*60*60)/60) %>
+									<% var seconds = Math.floor((timeInApp-hours*60*60-minutes*60)) %>
+									<%= hours<10 ? "0"+hours : hours %>:<%= minutes<10 ? "0"+minutes : minutes %>:<%= seconds<10 ? "0"+seconds : seconds %>
+								<% }else{ %>
+									<%= "Unknown" %>
+								<% } %></span>
+							<% }else{ %>
+								<%= "Unknown" %>
+							<% } %></span>
+						</li>
+						<li>Furthest tutorial point reached: <span style="float:right">
+							<% if(typeof userJson.User.tutorialProgress !== "undefined"){ %>
+								<% var largestPoint = 0; %>
+								<% for(var key in userJson.User.tutorialProgress){ %>
+									<% if(userJson.User.tutorialProgress[key]) { %>
+										<% largestPoint = parseInt(key)>largestPoint && parseInt(key)<1000 ? parseInt(key) : largestPoint; %>
+									<% } %>
+								<% } %>
+								<%= largestPoint %>
+							<% } else {%>
+								<%= "Unknown" %>
+							<% } %></span>
+						</li>
+						<li>Number of up sale pages seen: <span style="float:right">
+							<% if(typeof userJson.User.offerTriggersShown !== "undefined"){ %>
+								<%= userJson.User.offerTriggersShown.length %>
+							<% } else { %>
+								<%= "0" %>
+							<% } %></span>
+						</li>
+						<li>Number of times invite button pressed: <span style="float:right"><%= invites %></span>
+						<li>Learning module progress: <span style="float:right">
+							<% if(typeof userJson.User.tutorialProgress !== "undefined"){ %>
+								<% var key; %>
+								<% var progress = 0; %>
+								<% for(key in userJson.User.tutorialProgress){ %>
+									<% if(key>=1000 && userJson.User.tutorialProgress[key]){%>
+										<% progress+=1; %>
+									<% } %>
+								<% } %>
+								<%= progress %>
+							<% }else{ %>
+								<%= "Unknown" %>
+							<% } %>
+						</span>
+					</ul>
+				</div>
+			</div>
+			<% if(typeof userJson.User.badgeProgress !== "undefined"){ %>
+				<table>
+				<thead><td>Badge name</td><td>count</td><td>isComplete</td></thead>
+				<% var key; %>
+				<% for(key in userJson.User.badgeProgress){ %>
+					<tr>
+					<td><%= key %></td>
+					<td><%= userJson.User.badgeProgress[key].count %></td>
+					<td><%= userJson.User.badgeProgress[key].isComplete %></td>
+					</tr>
+				<% } %>
+				</table>
+			<% } %>
+			<% if(typeof userJson.User.tutorialProgress !== "undefined"){ %>
+				<table>
+				<thead><td>Tutorial point</td><td>passed</td></thead>
+				<% var key; %>
+				<% for(key in userJson.User.tutorialProgress){ %>
+					<tr>
+					<td><%= key %></td>
+					<td><%= userJson.User.tutorialProgress[key] %></td>
+					</tr>
+				<% } %>
+				</table>
+			<% } %>
+			<% if(typeof userJson.User.offerTriggersShown !== "undefined"){ %>
+				<table>
+				<thead><td>Offer triggers shown</td></thead>
+				<% var offer; %>
+				<% for(offer in userJson.User.offerTriggersShown){ %>
+					<tr>
+					<td><%= userJson.User.offerTriggersShown[offer] %></td>
+					</tr>
+				<% } %>
+				</table>
+			<% } %>
+			<% if(typeof userJson.User.subscriptions !== "undefined"){ %>
+				<table>
+				<thead><td>Subscription</td><td>Trial days</td><td>Receipt</td><td>Date</td></thead>
+				<% var subscription; %>
+				<% for(subscription in userJson.User.subscriptions){ %>
+					<tr>
+					<td><%= userJson.User.subscriptions[subscription].sku %></td>
+					<td><%= userJson.User.subscriptions[subscription].trialDaysIncluded %></td>
+					<td style="word-break:break-all;"><%= userJson.User.subscriptions[subscription].receipt %></td>
+					<td><%= userJson.User.subscriptions[subscription].date %></td>
+					</tr>
+				<% } %>
+				</table>
+			<% } %>
+			<% if(typeof userJson.Raw.Profile !== "undefined"){ %>
+				<table>
+				<thead><td>Profiles</td><td>Shared with</td><td>Shared count</td></thead>
+				<% var profile; %>
+				<% for(profile in userJson.Raw.Profile){ %>
+					<tr>
+					<td><%= userJson.Raw.Profile[profile].name %></td>
+					<td><%= userJson.Raw.Profile[profile].sharedWithEmails %></td>
+					<td><%= userJson.Raw.Profile[profile].sharedWithEmails.length %></td>
+					</tr>
+				<% } %>
+				</table>
+			<% } %>
+		</div>
+	</div>
+<% } %>
+<script type="text/javascript">
+
+	function queryUser() {
+		var queryUsername = $("#txtUsername").val();
+		window.location.href = "/queryUserData/" + encodeURIComponent(queryUsername);
+	}
+
+	$(document).ready(function() {
+		if(document.getElementById('txtData').innerHTML===""){
+			$('#txtUsername').select();
+		} else {
+			$('#txtData').select();
+		}
+	});
+
+</script>
+
+<% include ./_footer %>

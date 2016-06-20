@@ -1,0 +1,177 @@
+<% include ./_header %>
+
+<div class="row collapse">
+	<div class="small-9 columns">
+		<h2>List of promo codes:</h2>
+	</div>
+	<div class="small-3 columns">
+		<div class="row collapse">
+			<div class="small-8 columns">
+				<input id="txtSearchQuery"  type="text"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnSearch').click()}" placeholder="Search term" value="<%= typeof query==="undefined" ? '' : query %>">
+			</div>
+			<div class="small-4 columns">
+				<a id="btnSearch" href="#" class="button postfix" onclick="searchPromoCode()">Search</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row collapse">
+<% var displayProperties = ['3 months subscription', '6 months subscription', '12 months subscription', '30 trialdays', '60 trialdays', '90 trialdays'] %>
+<% var properties = ['superspeak_3months', 'superspeak_6months', 'superspeak_12months', 'trialdays_30', 'trialdays_60', 'trialdays_90'] %>
+</pre>
+<ul class="f-dropdown" id="drop1">
+	<% if(typeof error === "undefined"){ %>
+		<% for(var i in properties){ %>
+			<% if(requiredProperties.indexOf(properties[i])==-1){ %>
+	    		<li><a href="#" onclick="txtHandout_Change('<%= properties[i] %>')"><%= displayProperties[i] %></a></li>
+	    	<% } %>
+	    <% } %>
+	<% }else{ %>
+    	<% for(var i in properties){ %>
+	    		<li><a href="#" onclick="txtHandout_Change('<%= properties[i] %>')"><%= displayProperties[i] %></a></li>
+		<% } %>
+	<% } %>
+</ul>
+</div>
+<div class="row collapse">
+	<% if(typeof error === "undefined"){ %>
+		<table class="small-12 columns">
+		<thead>
+			<td><span onclick="setSort('createdAt','<%= sortType=="asc" ? "dsc" : "asc" %>')">Created At<%= sortField=="createdAt" ? (sortType=="asc" ? '\u25B2' : '\u25BC' ) : "" %></span></td>
+			<td><span onclick="setSort('name','<%= sortType=="asc" ? "dsc" : "asc" %>')">Name<%= sortField=="name" ? (sortType=="asc" ? '\u25B2' : '\u25BC' ) : "" %></span></td>
+			<td><span onclick="setSort('promoCode','<%= sortType=="asc" ? "dsc" : "asc" %>')">Promo code<%= sortField=="promoCode" ? (sortType=="asc" ? '\u25B2' : '\u25BC' ) : "" %></span></td>
+			<td>Handout</td>
+			<td>Valid Until</td>
+			<td>Number of Users</td>
+			<td>Times Used</td>
+		</thead>
+		   <tr>
+			   <td style="word-break:break-all;"></td>
+			   <td style="word-break:break-all;"><input id="name" type="text" /></td>
+			   <td style="word-break:break-all;"><input id="promoCode" type="text" value="<%= generateCode() %>" /></td>
+			   <td style="word-break:break-all;">
+					<a id="handoutButton" class="tiny button dropdown" href="#" data-dropdown="drop1">Set Handout</a>
+			   </td>
+			   <td style="word-break:break-all;"><input id="endsAt" type="date" /></td>
+			   <td style="word-break:break-all;"><input id="count" type="text" value="0" /></td>
+			   <td style="word-break:break-all;"><button onclick="storePromoCode()" style="float:right">Create</button></td>
+		   </tr>
+		<% for(var i=0; i<promocodeList.length; i++) {%>
+		   <tr>
+			   <td style="word-break:break-all;"><%= promocodeList[i].createdAt.toDateString() %></td>
+			   <td style="word-break:break-all;"><%= promocodeList[i].name %></td>
+			   <td style="word-break:break-all;"><%= promocodeList[i].promoCode %></td>
+			   <td style="word-break:break-all;"><%= promocodeList[i].handout %></td>
+			   <td style="word-break:break-all;"><%= promocodeList[i].endsAt.toDateString() %></td>
+			   <td style="word-break:break-all;"><%= promocodeList[i].count %></td>
+			   <td style="word-break:break-all;"><%= promocodeList[i].used %></td>
+		   </tr>
+		<% } %>
+		</table>
+		<div style="float:right">Showing <%= (page-1)*20+1 %>-<%= page*20<count ? page*20 : count %> of <%= count %>
+			<ul class="pagination">
+			  <li class="arrow unavailable"><a href="#" onclick="goToPage(<%= (parseInt(page)-1) %>)">&laquo;</a></li>
+			  <% for(var i=0;i<Math.ceil(count/20);i++){ %>
+			  	<li <%= (page-1)==i ? "class='current'" : "" %>><a href="#" onclick="goToPage(<%= i+1 %>)"><%= i+1 %></a></li>
+			  <% } %>
+			  <li class="arrow"><a href="#" onclick="goToPage(<%= parseInt(page)+1 %>)">&raquo;</a></li>
+			</ul>
+		</div>
+	<% } %>
+</div>
+<% if(typeof error === "undefined"){ %>
+	<script type="text/javascript">
+
+		function getQuery(){
+			var match,
+			pl     = /\+/g,  // Regex for replacing addition symbol with a space
+			search = /([^&=]+)=?([^&]*)/g,
+			decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+			query  = window.location.search.substring(1);
+
+			var attributes = {};
+			while (match = search.exec(query))
+				attributes[decode(match[1])] = decode(match[2]);
+
+			return attributes;
+		}
+		function createQueryString(attributes){
+			var attributeString = "?";
+			for(var key in attributes){
+				attributeString+=key+(attributes[key]=="" ? "&" : ("="+attributes[key]+"&"));
+			}
+			return attributeString.substring(0,attributeString.length-1);
+		}
+
+		function searchPromoCode() {
+			var searchQuery = $("#txtSearchQuery").val();
+			if(searchQuery!=""){
+				window.location.href = "/promocodes/search/" + encodeURIComponent(searchQuery);
+			}else{
+				window.location.href = "/promocodes";
+			}
+		}
+		document.onkeyup = function(e) {
+		    e = e || window.event;
+		    if (e.keyCode==37) {
+		    	goToPage(<%= parseInt(page)-1 %>)
+		    }else if(e.keyCode==39){
+		    	goToPage(<%= parseInt(page)+1 %>)
+		    }
+		};
+		function goToPage(pageNum,attributes) {
+			if(typeof attributes === "undefined"){
+				var attributes ="";
+				if(window.location.href.indexOf("?")!=-1)
+					attributes = window.location.href.substring(window.location.href.indexOf("?"))
+			}
+			window.location.href = "/promocodes/<%= query===undefined ? '' : 'search/'+query+'/' %>"+pageNum+attributes;
+		}
+		function setSort(sortField,sortType) {
+			var attributes = getQuery();
+
+			attributes["sortField"]=sortField;
+			attributes["sortType"]=sortType;
+			var attributeString = createQueryString(attributes);
+			goToPage(<%= parseInt(page) %>,attributeString);
+		}
+		function addProperty(property) {
+			var attributes = getQuery();
+			attributes[property] = "";
+			goToPage(<%= parseInt(page) %>,createQueryString(attributes));
+		}
+		function removeProperty(property) {
+			var attributes = getQuery();
+			delete attributes[property];
+			goToPage(<%= parseInt(page) %>,createQueryString(attributes));
+		}
+
+		function txtHandout_Change(value){
+			document.getElementById("handoutButton").textContent = value;
+			$("#drop1").toggle();
+		}
+
+		function storePromoCode() {
+			alert($('#endsAt').val());
+			$.ajax({
+				url: "/promocodes/" 
+					+ encodeURIComponent($('#name').val()) 
+					+ "/" + encodeURIComponent($('#promoCode').val())
+					+ "/" + encodeURIComponent(document.getElementById("handoutButton").textContent)
+					+ "/" + encodeURIComponent($('#endsAt').val())
+					+ "/" + encodeURIComponent($('#count').val()),
+				method: "PUT",
+				success: function() {
+					alert("Promo code " + $('#promoCode').val() + " created");
+					goToPage(0);
+				},
+				error: function(jqXHR) { 
+					alert(jqXHR);
+					console.error(jqXHR); 
+				}
+			});
+		}
+	</script>
+<% } %>
+
+<% include ./_footer %>

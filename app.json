@@ -11,15 +11,19 @@
     },
     "APP_ID": {
       "description": "A unique identifier for your app.",
-      "value": "myAppId"
+      "value": "SuperSpeakDev"
     },
     "MASTER_KEY": {
       "description": "A key that overrides all permissions. Keep this secret.",
-      "value": "myMasterKey"
+      "value": "test-master-key"
     },
     "SERVER_URL": {
       "description": "URL to connect to your Heroku instance (update with your app's name + PARSE_MOUNT)",
-      "value": "http://yourappname.herokuapp.com/parse"
+      "value": "http://superspeakdev.herokuapp.com/parse"
+    },
+    "MONGODB_URI":{
+      "description: "URI to MongoDB instance",
+      "value": "mongodb://heroku_707p4ntf:m0covq7hdfdphdahbcnmck7mhh@ds021701.mlab.com:21701/heroku_707p4ntf"
     }
   },
   "image": "heroku/nodejs",

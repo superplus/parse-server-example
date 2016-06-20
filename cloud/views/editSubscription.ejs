@@ -1,0 +1,103 @@
+<% include ./_header %>
+
+<h2>Choose user to edit subscription</h2>
+<br/>
+<div class="row collapse">
+	<label for="txtUsername">
+		Username:
+	</label>
+	<div class="small-10 columns">
+		<input id="txtUsername"  type="text" value="<%=typeof username !=='undefined' ? username : "" %>"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnQuery').click()}" placeholder="Username">
+	</div>
+	<div class="small-2 columns">
+		<a id="btnQuery" href="#" class="button postfix" onclick="getUser()">Get user</a>
+	</div>
+</div>
+<div class="row collapse">
+	<% if (typeof username !== "undefined") { %>
+		<% if (hasSubscription) { %>
+			Subscription date: <div id="divStartDate"> <%= startDate %> </div>
+			<br/>
+			Original end date: <div id="divOriginalEndDate"> <%= originalEndDate %> </div>
+			<br/>
+			Adjusted end date: <div id="divEndDate"><%= endDate %></div>
+			</br>
+			Additional days included: <div id="divTrialDaysIncluded"> <%= trialDaysIncluded %> </div>
+			<br/>
+			<label>
+				Days left:
+				<input id="txtRemainingDays" type="text" value="<%= daysLeft %>" onchange="remainingDaysChanged(this.value);"/>
+			</label>
+			<button id="btnSaveChanges" onclick="saveChanges();" style="float:right">Save changes</button>
+
+		<% } else { %>
+			User has no active subscriptions. Add a subscription:
+			<br/>
+			<input type="radio" name="radio" id="rad3months" value="superspeak_3months" checked>3 months</input>
+			<br/>
+			<input type="radio" name="radio" id="rad6months" value="superspeak_6months">6 months</input>
+			<br/>
+			<input type="radio" name="radio" id="rad12months" value="superspeak_12months">12 months</input>
+
+			<br/></br>
+			<button id="btnSaveChanges" onclick="saveChanges();" style="float:right">Save changes</button>
+		<% } %>
+	<% } %>
+</div>
+<script>
+
+	function getUser() {
+		window.location.href = "/editSubscription/" + encodeURIComponent($('#txtUsername').val());
+	}
+
+
+	<% if (typeof username !== "undefined" && hasSubscription) { %>
+
+		function getTrialDaysIncluded() {
+			var originalEndDate = moment($('#divOriginalEndDate').html());
+			var adjustedEndDate = moment.utc().add(parseInt($('#txtRemainingDays').val()), 'days').startOf('day');
+			return adjustedEndDate.diff(originalEndDate, 'days');
+		}
+
+		function remainingDaysChanged(remainingDays) {
+			remainingDays = parseInt(remainingDays);
+
+			if (isNaN(remainingDays) || remainingDays < 0) {
+				$('#divEndDate').html("-");
+				$('#divTrialDaysIncluded').html("-");
+				$('#btnSaveChanges').attr('disabled');
+			} else {
+				$('#divEndDate').html(moment.utc().add(remainingDays, 'days').startOf('day').toDate().toUTCString());
+				$('#divTrialDaysIncluded').html(getTrialDaysIncluded());
+				$('#btnSaveChanges').removeAttr('disabled');
+			}
+		}
+
+		function saveChanges() {
+			$.ajax({
+				url: "/editSubscription/" + encodeURIComponent($('#txtUsername').val()),
+				method: "PUT",
+				data: { trialDaysIncluded: getTrialDaysIncluded() },
+				success: function() { alert("Data was saved successfully"); },
+				error: function(jqXHR) { console.error(jqXHR); }
+			});
+		}
+	<% } else { %>
+
+		function saveChanges() {
+			$.ajax({
+				url: "/editSubscription/" + encodeURIComponent($('#txtUsername').val()),
+				method: "POST",
+				data: { sku: $('input:checked')[0].value },
+				success: function() { window.location.reload(); },
+				error: function(jqXHR) { console.error(jqXHR); }
+			});
+		}
+
+	<% } %>
+	$(document).ready(function() {
+		$('#txtUsername').select();
+	});
+</script>
+
+<% include ./_footer %>

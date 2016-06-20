@@ -1,0 +1,79 @@
+<% include ./_header %>
+
+<h2>Choose user to see and edit trial period</h2>
+<div class="row collapse">
+	<label for="txtUsername">
+		Username:
+	</label>
+	<div class="small-10 columns">
+		<input id="txtUsername"  type="text" value="<%=username%>"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnQuery').click()}" placeholder="Username">
+	</div>
+	<div class="small-2 columns">
+		<a id="btnQuery" href="#" class="button postfix" onclick="getUser()">Get user</a>
+	</div>
+</div>
+<div class="row collapse">
+	<% if (username != "") { %>
+		<label>
+			Total trial period length:
+			<input id="txtRemainingDays" type="text" value="<%=trialPeriodLength%>" onchange="txtRemainingDays_Change(parseInt(this.value))"/>
+		</label>
+
+		<label>
+			Number of days left:
+			<input id="txtDaysLeft" type="text" value="<%=daysLeft%>" onchange="txtDaysLeft_Change(parseInt(this.value))"/>
+		</label>
+
+		<label>
+			Number of days added:
+			<input id="txtDaysAdded" type="text" value="0" onchange="txtDaysAdded_Change(parseInt(this.value))"/>
+		</label>
+
+		<button onclick="storeUser()" style="float:right">Save changes</button>
+	<% } %>
+</div>
+
+<script>
+	var originalLength = <%= trialPeriodLength %>;
+	var daysSpent = originalLength - <%= daysLeft %>;
+
+	function getUser() {
+		window.location.href = "/extendTrialPeriod/" + encodeURIComponent($('#txtUsername').val());
+	}
+
+	function storeUser() {
+		$.ajax({
+			url: "/extendTrialPeriod/" + encodeURIComponent($('#txtUsername').val()) + "/" + $('#txtRemainingDays').val(),
+			method: "PUT",
+			success: function() {
+				alert("Data was saved successfully");
+				originalLength = parseInt($('#txtRemainingDays').val());
+				$('#txtDaysAdded').val(0);
+			},
+			error: function(jqXHR) { console.error(jqXHR); }
+		});
+	}
+
+	function txtRemainingDays_Change(value) {
+		if (isNaN(value)) return;
+		$('#txtDaysLeft').val(value - daysSpent);
+		$('#txtDaysAdded').val(value - originalLength);
+	}
+
+	function txtDaysLeft_Change(value) {
+		if (isNaN(value)) return;
+		$('#txtRemainingDays').val(value + daysSpent);
+		$('#txtDaysAdded').val(value + daysSpent - originalLength);
+	}
+
+	function txtDaysAdded_Change(value) {
+		if (isNaN(value)) return;
+		$('#txtRemainingDays').val(originalLength + value);
+		$('#txtDaysLeft').val(originalLength - daysSpent + value);
+	}
+	$(document).ready(function() {
+		$('#txtUsername').select();
+	});
+</script>
+
+<% include ./_footer %>

@@ -1,0 +1,143 @@
+<% include ./_header %>
+
+<div class="row collapse">
+	<div class="small-9 columns">
+		<h2>List of users:</h2>
+	</div>
+	<div class="small-3 columns">
+		<div class="row collapse">
+			<div class="small-8 columns">
+				<input id="txtSearchQuery"  type="text"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnSearch').click()}" placeholder="Search term" value="<%= typeof query==="undefined" ? '' : query %>">
+			</div>
+			<div class="small-4 columns">
+				<a id="btnSearch" href="#" class="button postfix" onclick="searchUser()">Search</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row collapse">
+<% if(typeof error === "undefined"){ %>
+	<% for(var i in requiredProperties){ %>
+		<span class="tiny button" onclick="removeProperty('<%= requiredProperties[i] %>')"><%= requiredProperties[i] %>&nbsp;&nbsp;&nbsp;<a style="right: 0.22222rem;background: inherit;color: #333333;font-size: 1.22222rem;line-height: .9;margin-top: -0.61111rem;opacity: 0.5;padding: 0 6px 4px;position: absolute;top: 50%;">&times;</a>
+		</span>
+	<% } %>
+<% } %>
+<% var properties = ['offerTriggersShown','name','username','badgeProgress','email','subscriptions','trialPeriodLength','tutorialProgress'] %>
+<%if(typeof error === "undefined" && properties.length != requiredProperties.length){ %>
+	<a class="tiny button dropdown" href="#" data-dropdown="drop1">Add property</a>
+<% } %>
+</pre>
+<ul class="f-dropdown" id="drop1">
+	<% if(typeof error === "undefined"){ %>
+		<% for(var i in properties){ %>
+			<% if(requiredProperties.indexOf(properties[i])==-1){ %>
+	    		<li><a href="#" onclick="addProperty('<%= properties[i] %>')"><%= properties[i] %></a></li>
+	    	<% } %>
+	    <% } %>
+	<% }else{ %>
+    	<% for(var i in properties){ %>
+    		<li><a href="#" onclick="addProperty('<%= properties[i] %>')"><%= properties[i] %></a></li>
+		<% } %>
+	<% } %>
+</ul>
+</div>
+<div class="row collapse">
+	<% if(typeof error === "undefined"){ %>
+		<table class="small-12 columns">
+		<thead>
+			<td><span onclick="setSort('username','<%= sortType=="asc" ? "dsc" : "asc" %>')">Username<%= sortField=="username" ? (sortType=="asc" ? '\u25B2' : '\u25BC' ) : "" %></span></td>
+			<td><span onclick="setSort('name','<%= sortType=="asc" ? "dsc" : "asc" %>')">Name<%= sortField=="name" ? (sortType=="asc" ? '\u25B2' : '\u25BC' ) : "" %></span></td>
+			<td></td><td></td><td></td><td></td>
+		</thead>
+		<% for(var i=0; i<userList.length; i++) {%>
+		   <tr>
+			   <td style="word-break:break-all;"><%= userList[i].username %></td>
+			   <td <%= 'style=\''+(typeof(userList[i].name) === "undefined" ? 'color:#bbb;' : '')+'word-break:break-all;\'' %>><%= userList[i].name %></td>
+			   <td><a href="/queryUserData/<%= userList[i].username %>">Get data</a></td>
+			   <td><a href="/extendTrialPeriod/<%= userList[i].username %>">Extend trial (<%= userList[i].trialPeriodLeft %>d left)</a></td>
+			   <td><a href="/editSubscription/<%= userList[i].username %>"><%= userList[i].hasSubscription ? "Edit" : "Add" %> subscription</a></td>
+			   <td><a href="/cloneUser/<%= userList[i].username %>">Clone</a></td>
+		   </tr>
+		<% } %>
+		</table>
+		<div style="float:right">Showing <%= (page-1)*20+1 %>-<%= page*20<count ? page*20 : count %> of <%= count %>
+			<ul class="pagination">
+			  <li class="arrow unavailable"><a href="#" onclick="goToPage(<%= (parseInt(page)-1) %>)">&laquo;</a></li>
+			  <% for(var i=0;i<Math.ceil(count/20);i++){ %>
+			  	<li <%= (page-1)==i ? "class='current'" : "" %>><a href="#" onclick="goToPage(<%= i+1 %>)"><%= i+1 %></a></li>
+			  <% } %>
+			  <li class="arrow"><a href="#" onclick="goToPage(<%= parseInt(page)+1 %>)">&raquo;</a></li>
+			</ul>
+		</div>
+	<% } %>
+</div>
+<% if(typeof error === "undefined"){ %>
+	<script type="text/javascript">
+
+		function getQuery(){
+			var match,
+			pl     = /\+/g,  // Regex for replacing addition symbol with a space
+			search = /([^&=]+)=?([^&]*)/g,
+			decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+			query  = window.location.search.substring(1);
+
+			var attributes = {};
+			while (match = search.exec(query))
+				attributes[decode(match[1])] = decode(match[2]);
+
+			return attributes;
+		}
+		function createQueryString(attributes){
+			var attributeString = "?";
+			for(var key in attributes){
+				attributeString+=key+(attributes[key]=="" ? "&" : ("="+attributes[key]+"&"));
+			}
+			return attributeString.substring(0,attributeString.length-1);
+		}
+
+		function searchUser() {
+			var searchQuery = $("#txtSearchQuery").val();
+			if(searchQuery!=""){
+				window.location.href = "/listUsers/search/" + encodeURIComponent(searchQuery);
+			}else{
+				window.location.href = "/listUsers";
+			}
+		}
+		document.onkeyup = function(e) {
+		    e = e || window.event;
+		    if (e.keyCode==37) {
+		    	goToPage(<%= parseInt(page)-1 %>)
+		    }else if(e.keyCode==39){
+		    	goToPage(<%= parseInt(page)+1 %>)
+		    }
+		};
+		function goToPage(pageNum,attributes) {
+			if(typeof attributes === "undefined"){
+				var attributes ="";
+				if(window.location.href.indexOf("?")!=-1)
+					attributes = window.location.href.substring(window.location.href.indexOf("?"))
+			}
+			window.location.href = "/listUsers/<%= query===undefined ? '' : 'search/'+query+'/' %>"+pageNum+attributes;
+		}
+		function setSort(sortField,sortType) {
+			var attributes = getQuery();
+
+			attributes["sortField"]=sortField;
+			attributes["sortType"]=sortType;
+			var attributeString = createQueryString(attributes);
+			goToPage(<%= parseInt(page) %>,attributeString);
+		}
+		function addProperty(property) {
+			var attributes = getQuery();
+			attributes[property] = "";
+			goToPage(<%= parseInt(page) %>,createQueryString(attributes));
+		}
+		function removeProperty(property) {
+			var attributes = getQuery();
+			delete attributes[property];
+			goToPage(<%= parseInt(page) %>,createQueryString(attributes));
+		}
+	</script>
+<% } %>
+
+<% include ./_footer %>

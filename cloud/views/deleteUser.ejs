@@ -1,0 +1,72 @@
+<% include ./_header %>
+
+<h2>Enter email of user to delete</h2>
+<div class="row collapse">
+	<div class="small-10 columns">
+		<input id="txtUsername"  type="text" value="<%=username%>"  onkeydown="if(window.event.keyCode===13){document.getElementById('btnQuery').click()}" placeholder="E-mail">
+	</div>
+	<div class="small-2 columns">
+		<a id="btnQuery" href="#" class="button postfix" onclick="queryUser()">Fetch</a>
+	</div>
+</div>
+<% if(typeof data !== "undefined" && data!==""){ %>
+	<% var userJson = JSON.parse(data) %>
+	<div class="row collapse">
+		<div class="small-12 columns">
+			<% if (typeof confirm !=="undefined") { %>
+				<div class="alert-box success">
+					<h3>User "<%= userJson.user.name %>" and all of their data has been deleted</h3>
+				</div>
+			<% } %>
+			<% if (typeof confirm ==="undefined") { %>
+				<div class="alert-box">
+					<h3>Confirm deletion of "<%= userJson.user.name %>" and all of their data</h3>
+					<h4>This includes profiles and lessons they have shared, but not those shared with them</h4>
+				</div>
+			<% } %>
+			<div class="row">
+				<div class="small-3 columns">
+					<ul class="no-bullet">
+						<li>Profiles: <%= userJson.profiles.length %>
+						<li>Settings: <%= userJson.settings.length %>
+						<li>Categories: <%= userJson.categories.length %>
+						<li>Items: <%= userJson.items.length %>
+						<li>Resources: <%= userJson.resources.length %>
+						<li>Lessons: <%= userJson.lessons.length %>
+						<li>LessonTasks: <%= userJson.lessonTasks.length %>
+						<li>LessonStats: <%= userJson.lessonStats.length %>
+						<li>LessonTaskStats: <%= userJson.lessonTaskStats.length %>
+					</ul>
+				</div>
+			</div>
+			<% if (typeof confirm ==="undefined") { %>
+				<a id="btnConfirm" href="#" class="button prefix" style="background-color: #aa0000" onclick="deleteUser()">Confirm deletion</a>
+			<% } %>
+		</div>
+	</div>
+<% } %>
+
+<script type="text/javascript">
+
+	function queryUser() {
+		var queryUsername = $("#txtUsername").val();
+		window.location.href = "/deleteUser/" + encodeURIComponent(queryUsername);
+	}
+
+	function deleteUser() {
+		var queryUsername = $("#txtUsername").val();
+
+		window.location.href = "/deleteUser/" + encodeURIComponent(queryUsername) + "/true";
+	}
+
+	$(document).ready(function() {
+		if(document.getElementById('txtData').innerHTML===""){
+			$('#txtUsername').select();
+		} else {
+			$('#txtData').select();
+		}
+	});
+
+</script>
+
+<% include ./_footer %>
